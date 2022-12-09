@@ -9,9 +9,6 @@ jobs:
   build-ubuntu-docker:
     name: build in ubuntu docker
     runs-on: ubuntu-latest
-
-    env:
-      FILE_NAME: magick-release
     
     steps:
       - name: Checkout code
@@ -22,8 +19,8 @@ jobs:
         run: |
           docker pull ubuntu:20.04
 
-       - name: Set Magick Version
-         run: |
+      - name: Set Magick Version
+        run: |
           echo "MAGICK_VERSION=$(curl -fsSLI -o /dev/null -w %{url_effective} https://github.com/ImageMagick/ImageMagick/releases/latest | rev | cut -d '/' -f 1 | rev)" >> $GITHUB_ENV
  
       - name: build magick
@@ -63,7 +60,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
          path: ${{ github.workspace }}/artifact/
-         
+
 
       - name: Set Magick Version
         run: |
