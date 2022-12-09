@@ -2,7 +2,7 @@
 set -e
 
 cd /root
-curl https://github.com/ImageMagick/ImageMagick/archive/7.0.8-45.tar.gz -L -o tmp-imagemagick.tar.gz
+curl https://github.com/ImageMagick/ImageMagick/archive/$MAGICK_VERSION.tar.gz -L -o tmp-imagemagick.tar.gz
 tar xf tmp-imagemagick.tar.gz
 cd ImageMagick*
 

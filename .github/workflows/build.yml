@@ -2,32 +2,8 @@
 name: build magick
 
 on:
-  workflow_dispatch:
-      inputs:
-        FFMPEG_VERSION:
-          description: 'FFMPEG_VERSION'     
-          required: true
-          default: '5.1'
-          type: string
-          
-        NVENC_VERSION:
-          description: 'NVENC_VERSION'     
-          required: true
-          default: '6.10'
-          type: string
-  
-  workflow_call:
-      inputs:
-        FFMPEG_VERSION:
-          required: true
-          default: '5.1'
-          type: string
-          
-        NVENC_VERSION:    
-          required: true
-          default: '6.10'
-          type: string
-
+  workflow_dispatch
+        
 jobs:
 
   build-ubuntu-docker:
@@ -45,6 +21,10 @@ jobs:
         id: cuda_ubuntu_pull
         run: |
           docker pull ubuntu:20.04
+
+       - name: Set Magick Version
+         run: |
+          echo "MAGICK_VERSION=$(curl -fsSLI -o /dev/null -w %{url_effective} https://github.com/ImageMagick/ImageMagick/releases/latest | rev | cut -d '/' -f 1 | rev)" >> $GITHUB_ENV
  
       - name: build magick
         run: |
@@ -57,13 +37,13 @@ jobs:
 
       - name: Archive Release
         run: |
-          cd ${{ github.workspace }}/artifacts/result; zip -r  ${{ github.workspace }}/${{ env.FILE_NAME }}.zip *
+          cd ${{ github.workspace }}/artifacts/result; zip -r  ${{ github.workspace }}/ImageMagick-${{ env.MAGICK_VERSION }}.zip *
       
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ env.FILE_NAME }}
-          path: ${{ github.workspace }}/${{ env.FILE_NAME }}.zip
+          name: ImageMagick-${{ env.MAGICK_VERSION }}
+          path: ${{ github.workspace }}/ImageMagick-${{ env.MAGICK_VERSION }}.zip
           retention-days: 1
 
         
@@ -82,25 +62,20 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v3
         with:
-         path: ${{ github.workspace }}/build/
+         path: ${{ github.workspace }}/artifact/
+         
 
-      - id: prev_tag
+      - name: Set Magick Version
         run: |
-          TAG=$(git tag --sort=creatordate | tail -1)
-          if [ -z "$TAG" ]; then TAG=1; fi
-          echo ::set-output name=tag::$TAG
-      - id: next_ver_code
-        run: | 
-          export TAG=${{ steps.prev_tag.outputs.tag }}
-          export NEXT_TAG=$(echo ${TAG} | awk -F. -v OFS=. '{$NF += 1 ; print}')
-          echo ::set-output name=NEXT_VER_CODE::$NEXT_TAG
+         echo "MAGICK_VERSION=$(curl -fsSLI -o /dev/null -w %{url_effective} https://github.com/ImageMagick/ImageMagick/releases/latest | rev | cut -d '/' -f 1 | rev)" >> $GITHUB_ENV
+
 
       - name: Upload modules to release
-        uses: svenstaro/upload-release-action@v2
+        uses: softprops/action-gh-release@v1
         with:
-          repo_token: ${{ secrets.PAT }}
-          file: ${{ github.workspace }}/build/**/*
-          release_name: magick-release
-          tag: ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
-          file_glob: true
-          overwrite: false
+          token: ${{ secrets.PAT }}
+          tag_name: ${{ env.MAGICK_VERSION}}
+          files: ${{ github.workspace }}/artifact/**/*
+          name: ImageMagick-${{ env.MAGICK_VERSION }}
+          draft: false
+          prerelease: false
