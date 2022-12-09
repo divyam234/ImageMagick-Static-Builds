@@ -20,7 +20,7 @@ RUN /root/build/build_libjpeg.sh
 RUN /root/build/build_libpng.sh
 RUN /root/build/build_libwebp.sh
 RUN /root/build/build_libde265.sh
-RUN /root/build/build_libheif.sh
+# RUN /root/build/build_libheif.sh
 RUN /root/build/build_libopenjp2.sh
 RUN /root/build/build_libtiff.sh
 RUN /root/build/build_libbz2.sh
