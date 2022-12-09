@@ -2,6 +2,9 @@
 set -e
 
 cd /root
+
+MAGICK_VERSION=$(curl -fsSLI -o /dev/null -w %{url_effective} https://github.com/ImageMagick/ImageMagick/releases/latest | rev | cut -d '/' -f 1 | rev)
+
 curl https://github.com/ImageMagick/ImageMagick/archive/$MAGICK_VERSION.tar.gz -L -o tmp-imagemagick.tar.gz
 tar xf tmp-imagemagick.tar.gz
 cd ImageMagick*
