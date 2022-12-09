@@ -71,7 +71,7 @@ jobs:
     name: Create Release
     runs-on: ubuntu-latest
     if: ${{ always() && contains(join(needs.*.result, ','), 'success') }}
-    needs: [build-cuda-ubuntu-docker]
+    needs: [build-ubuntu-docker]
     steps:
 
       - name: Checkout code
