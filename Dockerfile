@@ -1,8 +1,15 @@
 # syntax=docker/dockerfile:1
-FROM amazonlinux:2
 
-# Install OS packages...
-RUN yum install -y git gcc gcc-c++ cpp cpio make cmake automake autoconf chkconfig clang clang-libs dos2unix zlib zlib-devel zip unzip tar perl libxml2 bzip2 bzip2-libs xz xz-libs pkgconfig libtool
+FROM ubuntu:20.04
+
+RUN apt-get update \
+    && apt-get -y --no-install-recommends install build-essential curl ca-certificates libva-dev \
+        python3 python-is-python3 ninja-build meson git  \ 
+        cpio make cmake automake autoconf clang  dos2unix zlib1g-dev zip unzip tar perl \
+         libxml2 bzip2 bzip2-libs pkgconfig libtool \
+    && apt-get clean; rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/* \
+    && update-ca-certificates
+
 
 ADD build /root/build
 

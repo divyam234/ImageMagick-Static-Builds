@@ -1,0 +1,106 @@
+
+name: build magick
+
+on:
+  workflow_dispatch:
+      inputs:
+        FFMPEG_VERSION:
+          description: 'FFMPEG_VERSION'     
+          required: true
+          default: '5.1'
+          type: string
+          
+        NVENC_VERSION:
+          description: 'NVENC_VERSION'     
+          required: true
+          default: '6.10'
+          type: string
+  
+  workflow_call:
+      inputs:
+        FFMPEG_VERSION:
+          required: true
+          default: '5.1'
+          type: string
+          
+        NVENC_VERSION:    
+          required: true
+          default: '6.10'
+          type: string
+
+jobs:
+
+  build-ubuntu-docker:
+    name: build in ubuntu docker
+    runs-on: ubuntu-latest
+
+    env:
+      FILE_NAME: magick-release
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: pull base image
+        id: cuda_ubuntu_pull
+        run: |
+          docker pull ubuntu:20.04
+ 
+      - name: build magick
+        run: |
+          docker build -t magickubuntu .
+
+      - name: copy build
+        run: |
+          docker run --rm  -v ${{ github.workspace }}/artifacts:/root/output magickubuntu mv /root/result /root/output
+          sudo chmod -R 777 ${{ github.workspace }}/artifacts/
+
+      - name: Archive Release
+        run: |
+          cd ${{ github.workspace }}/artifacts/result; zip -r  ${{ github.workspace }}/${{ env.FILE_NAME }}.zip *
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.FILE_NAME }}
+          path: ${{ github.workspace }}/${{ env.FILE_NAME }}.zip
+          retention-days: 1
+
+        
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    if: ${{ always() && contains(join(needs.*.result, ','), 'success') }}
+    needs: [build-cuda-ubuntu-docker]
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+         path: ${{ github.workspace }}/build/
+
+      - id: prev_tag
+        run: |
+          TAG=$(git tag --sort=creatordate | tail -1)
+          if [ -z "$TAG" ]; then TAG=1; fi
+          echo ::set-output name=tag::$TAG
+      - id: next_ver_code
+        run: | 
+          export TAG=${{ steps.prev_tag.outputs.tag }}
+          export NEXT_TAG=$(echo ${TAG} | awk -F. -v OFS=. '{$NF += 1 ; print}')
+          echo ::set-output name=NEXT_VER_CODE::$NEXT_TAG
+
+      - name: Upload modules to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.PAT }}
+          file: ${{ github.workspace }}/build/**/*
+          release_name: magick-release
+          tag: ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
+          file_glob: true
+          overwrite: false
