@@ -2,6 +2,8 @@
 
 FROM ubuntu:20.04
 
+ENV DEBIAN_FRONTEND noninteractive
+
 RUN apt-get update \
     && apt-get -y --no-install-recommends install build-essential curl ca-certificates libva-dev \
         python3 python-is-python3 ninja-build meson git  \ 
