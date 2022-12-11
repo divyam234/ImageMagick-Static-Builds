@@ -14,10 +14,16 @@ RUN apt-get update \
     && apt-get clean; rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/* \
     && update-ca-certificates
     
-RUN  sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 10
+RUN add-apt-repository ppa:ubuntu-toolchain-r/test -y >/dev/null 2>&1
 
+RUN apt update && apt install gcc-11 g++-11 -y 
+
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 60 --slave /usr/bin/g++ g++ /usr/bin/g++-11
+
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 10
 
 ADD build /root/build
+
 
 # Remove the ones you don't need...
 RUN /root/build/build_libjpeg.sh
