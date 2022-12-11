@@ -8,6 +8,9 @@ jobs:
 
   build-ubuntu-docker:
     name: build in ubuntu docker
+    strategy:
+      matrix:
+        os: ['20.04', '18.04']
     runs-on: ubuntu-latest
     
     steps:
@@ -17,7 +20,7 @@ jobs:
       - name: pull base image
         id: cuda_ubuntu_pull
         run: |
-          docker pull ubuntu:20.04
+          docker pull ubuntu:${{ matrix.os }}
 
       - name: Set Magick Version
         run: |
@@ -34,13 +37,13 @@ jobs:
 
       - name: Archive Release
         run: |
-          cd ${{ github.workspace }}/artifacts/result; zip -r  ${{ github.workspace }}/ImageMagick-${{ env.MAGICK_VERSION }}.zip *
+          cd ${{ github.workspace }}/artifacts/result; zip -r  ${{ github.workspace }}/ImageMagick-${{ env.MAGICK_VERSION }}-${{ matrix.os }}.zip *
       
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ImageMagick-${{ env.MAGICK_VERSION }}
-          path: ${{ github.workspace }}/ImageMagick-${{ env.MAGICK_VERSION }}.zip
+          name: ImageMagick-${{ env.MAGICK_VERSION }}-${{ matrix.os }}
+          path: ${{ github.workspace }}/ImageMagick-${{ env.MAGICK_VERSION }}-${{ matrix.os }}.zip
           retention-days: 1
 
         
