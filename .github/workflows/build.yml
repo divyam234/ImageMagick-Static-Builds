@@ -28,7 +28,7 @@ jobs:
  
       - name: build magick
         run: |
-          docker build -t magickubuntu .
+          docker build --build-arg VER=${{ matrix.os }} -t magickubuntu .
 
       - name: copy build
         run: |
