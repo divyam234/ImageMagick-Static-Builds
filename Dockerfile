@@ -7,7 +7,7 @@ FROM ubuntu:${VER}
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update \
-    && apt-get -y --no-install-recommends install build-essential curl ca-certificates libva-dev \
+    && apt-get -y --no-install-recommends install build-essential software-properties-common curl ca-certificates libva-dev \
         python3 ninja-build meson git  \ 
         cpio make cmake automake autoconf clang  dos2unix zlib1g-dev zip unzip tar perl \
          libxml2 bzip2 pkg-config libtool \
