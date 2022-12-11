@@ -1,6 +1,8 @@
 # syntax=docker/dockerfile:1
 
-FROM ubuntu:20.04
+ARG VER=20.04
+
+FROM ubuntu:${VER}
 
 ENV DEBIAN_FRONTEND noninteractive
 
